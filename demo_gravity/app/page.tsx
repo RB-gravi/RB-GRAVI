@@ -20,6 +20,7 @@ import {
   Eye,
   GitPullRequest,
   Sparkles,
+  Search,
 } from "lucide-react"
 
 interface FileNode {
@@ -217,14 +218,7 @@ export default function AutoMarketingSpecRepo() {
   const [editedContent, setEditedContent] = useState("")
   const [hasChanges, setHasChanges] = useState(false)
   const [notifications, setNotifications] = useState<string[]>([])
-  const marketingSpecs = commits.filter((commit) => commit.marketingSpec)
-  const averageSpecScore =
-    marketingSpecs.length > 0
-      ? Math.round(
-          marketingSpecs.reduce((total, commit) => total + getSpecScore(commit.marketingSpec!), 0) /
-            marketingSpecs.length
-        )
-      : 0
+  const [fileSearch, setFileSearch] = useState("")
 
   useEffect(() => {
     if (selectedFile?.content) {
@@ -251,6 +245,29 @@ export default function AutoMarketingSpecRepo() {
         {node.children?.map((child) => renderFileTree(child, depth + 1))}
       </div>
     )
+  }
+
+  const filterFileTree = (node: FileNode, query: string): FileNode | null => {
+    if (!query) return node
+
+    const matches = node.name.toLowerCase().includes(query)
+
+    if (node.type === "file") {
+      return matches ? node : null
+    }
+
+    const filteredChildren = node.children
+      ?.map((child) => filterFileTree(child, query))
+      .filter((child): child is FileNode => child !== null)
+
+    if (matches || (filteredChildren && filteredChildren.length > 0)) {
+      return {
+        ...node,
+        children: filteredChildren ?? [],
+      }
+    }
+
+    return null
   }
 
   const handleContentChange = (value: string) => {
@@ -393,8 +410,28 @@ export default function AutoMarketingSpecRepo() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm">Files</CardTitle>
+                  <CardDescription>Search by filename to quickly locate files.</CardDescription>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search files..."
+                      value={fileSearch}
+                      onChange={(event) => setFileSearch(event.target.value)}
+                      className="pl-8"
+                      aria-label="Search files"
+                    />
+                  </div>
                 </CardHeader>
-                <CardContent>{renderFileTree(initialRepo)}</CardContent>
+                <CardContent>
+                  {(() => {
+                    const filteredRepo = filterFileTree(initialRepo, fileSearch.trim().toLowerCase())
+                    if (!filteredRepo) {
+                      return <p className="text-sm text-muted-foreground">No files match your search.</p>
+                    }
+                    return renderFileTree(filteredRepo)
+                  })()}
+                </CardContent>
               </Card>
 
               {/* Code Editor */}
