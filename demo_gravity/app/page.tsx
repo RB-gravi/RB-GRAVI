@@ -52,6 +52,44 @@ interface MarketingSpec {
   effort: string
 }
 
+interface SpecChecklistItem {
+  label: string
+  met: boolean
+}
+
+const getSpecChecklist = (spec: MarketingSpec): SpecChecklistItem[] => [
+  {
+    label: "Clear target audience defined",
+    met: spec.targetAudience.trim().length > 0,
+  },
+  {
+    label: "Summary provides enough context (80+ chars)",
+    met: spec.summary.trim().length >= 80,
+  },
+  {
+    label: "At least three benefits outlined",
+    met: spec.benefits.length >= 3,
+  },
+  {
+    label: "Release scope clarified",
+    met: spec.releaseType.trim().length > 0,
+  },
+  {
+    label: "Messaging ready for launch (50+ chars)",
+    met: spec.suggestedMessaging.trim().length >= 50,
+  },
+  {
+    label: "Multiple affected areas listed",
+    met: spec.affectedAreas.length >= 2,
+  },
+]
+
+const getSpecScore = (spec: MarketingSpec) => {
+  const checklist = getSpecChecklist(spec)
+  const metCount = checklist.filter((item) => item.met).length
+  return Math.round((metCount / checklist.length) * 100)
+}
+
 const initialRepo: FileNode = {
   name: "acme-saas-app",
   type: "folder",
@@ -456,78 +494,106 @@ export default function AutoMarketingSpecRepo() {
 
           <TabsContent value="commits" className="space-y-4">
             <div className="space-y-4">
-              {commits.map((commit) => (
-                <Card key={commit.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <GitCommit className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium">{commit.message}</div>
-                          <div className="text-sm text-gray-500">
-                            {commit.author} • {commit.timestamp}
+              {commits.map((commit) => {
+                const score = commit.marketingSpec ? getSpecScore(commit.marketingSpec) : null
+                return (
+                  <Card key={commit.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <GitCommit className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{commit.message}</div>
+                            <div className="text-sm text-gray-500">
+                              {commit.author} • {commit.timestamp}
+                            </div>
                           </div>
                         </div>
+                        {commit.marketingSpec && (
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-green-100 text-green-800">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Auto-Generated Spec
+                            </Badge>
+                            <Badge variant="outline">{score}% Ready</Badge>
+                          </div>
+                        )}
                       </div>
-                      {commit.marketingSpec && (
-                        <Badge className="bg-green-100 text-green-800">
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          Auto-Generated Spec
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {/* Code Diff */}
-                      <div>
-                        <h4 className="font-medium mb-2">Code Changes</h4>
-                        <pre className="bg-gray-50 p-3 rounded text-xs overflow-x-auto">{commit.diff}</pre>
-                      </div>
-
-                      {/* Auto-Generated Marketing Spec */}
-                      {commit.marketingSpec && (
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Code Diff */}
                         <div>
-                          <h4 className="font-medium mb-2 flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-green-600" />
-                            Auto-Generated Marketing Spec
-                          </h4>
-                          <div className="bg-green-50 p-3 rounded space-y-3 text-sm">
-                            <div>
-                              <strong>Feature:</strong> {commit.marketingSpec.title}
-                            </div>
-                            <div>
-                              <strong>Summary:</strong> {commit.marketingSpec.summary}
-                            </div>
-                            <div>
-                              <strong>Impact:</strong>
-                              <Badge variant="outline" className="ml-2">
-                                {commit.marketingSpec.impact}
-                              </Badge>
-                            </div>
-                            <div>
-                              <strong>Suggested Messaging:</strong>
-                              <div className="italic mt-1 p-2 bg-white rounded">
-                                "{commit.marketingSpec.suggestedMessaging}"
+                          <h4 className="font-medium mb-2">Code Changes</h4>
+                          <pre className="bg-gray-50 p-3 rounded text-xs overflow-x-auto">{commit.diff}</pre>
+                        </div>
+
+                        {/* Auto-Generated Marketing Spec */}
+                        {commit.marketingSpec && (
+                          <div>
+                            <h4 className="font-medium mb-2 flex items-center gap-2">
+                              <Sparkles className="h-4 w-4 text-green-600" />
+                              Auto-Generated Marketing Spec
+                            </h4>
+                            <div className="bg-green-50 p-3 rounded space-y-3 text-sm">
+                              <div>
+                                <strong>Feature:</strong> {commit.marketingSpec.title}
+                              </div>
+                              <div>
+                                <strong>Summary:</strong> {commit.marketingSpec.summary}
+                              </div>
+                              <div>
+                                <strong>Impact:</strong>
+                                <Badge variant="outline" className="ml-2">
+                                  {commit.marketingSpec.impact}
+                                </Badge>
+                              </div>
+                              <div>
+                                <strong>Suggested Messaging:</strong>
+                                <div className="italic mt-1 p-2 bg-white rounded">
+                                  "{commit.marketingSpec.suggestedMessaging}"
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </TabsContent>
 
           <TabsContent value="marketing" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Marketing Spec Readiness
+                </CardTitle>
+                <CardDescription>Quality checks for launch-ready narratives.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="text-3xl font-semibold">{averageSpecScore}%</div>
+                  <p className="text-sm text-gray-600">Average readiness across generated specs.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">Audience clarity</Badge>
+                  <Badge variant="outline">Benefit coverage</Badge>
+                  <Badge variant="outline">Launch messaging</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {commits
-                .filter((commit) => commit.marketingSpec)
-                .map((commit) => (
+              {marketingSpecs.map((commit) => {
+                const checklist = getSpecChecklist(commit.marketingSpec!)
+                const score = getSpecScore(commit.marketingSpec!)
+                return (
                   <Card key={commit.id}>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -537,6 +603,24 @@ export default function AutoMarketingSpecRepo() {
                       <CardDescription>Generated from: {commit.message}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">Readiness Score</h4>
+                        <Badge variant="outline">{score}% Ready</Badge>
+                      </div>
+
+                      <div className="space-y-2">
+                        {checklist.map((item) => (
+                          <div key={item.label} className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">{item.label}</span>
+                            <Badge variant={item.met ? "default" : "secondary"}>
+                              {item.met ? "Met" : "Needs Work"}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+
+                      <Separator />
+
                       <div>
                         <h4 className="font-medium mb-1">Summary</h4>
                         <p className="text-sm text-gray-600">{commit.marketingSpec!.summary}</p>
@@ -566,7 +650,8 @@ export default function AutoMarketingSpecRepo() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )
+              })}
             </div>
           </TabsContent>
         </Tabs>
