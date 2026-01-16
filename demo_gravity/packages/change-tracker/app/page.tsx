@@ -64,6 +64,27 @@ export default function ChangeTracker() {
     return new Date(timestamp).toLocaleString()
   }
 
+  const impactCounts = changes.reduce(
+    (acc, change) => {
+      const impactKey = change.impact.toLowerCase()
+      if (impactKey === "high") acc.high += 1
+      if (impactKey === "medium") acc.medium += 1
+      if (impactKey === "low") acc.low += 1
+      return acc
+    },
+    { high: 0, medium: 0, low: 0 }
+  )
+
+  const categoryCounts = changes.reduce<Record<string, number>>((acc, change) => {
+    acc[change.changeCategory] = (acc[change.changeCategory] ?? 0) + 1
+    return acc
+  }, {})
+
+  const topCategory =
+    Object.entries(categoryCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ?? "No changes yet"
+
+  const totalLineChanges = changes.reduce((total, change) => total + change.totalChanges, 0)
+
   const getImpactColor = (impact: string) => {
     switch (impact.toLowerCase()) {
       case "high":
@@ -134,9 +155,9 @@ ${change.removedLines.map((line) => `- ${line}`).join("\n")}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2">
             <Eye className="h-8 w-8 text-blue-600" />
-            Marketing Document Change Tracker
+            GraviTrack Change Tracker
           </h1>
-          <p className="text-gray-600">Automatically track and summarize changes to your marketing documents</p>
+          <p className="text-gray-600">Automatically track and summarize changes to your GraviTrack documents</p>
           <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <FileText className="h-4 w-4" />
@@ -162,6 +183,36 @@ ${change.removedLines.map((line) => `- ${line}`).join("\n")}
             </a>
           </Button>
         </div>
+
+        <Card className="max-w-4xl mx-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              Change Pulse
+            </CardTitle>
+            <CardDescription>Live insights across your GraviTrack marketing updates</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <p className="text-xs uppercase text-gray-500">High Impact Alerts</p>
+                <p className="text-lg font-semibold text-gray-900">{impactCounts.high}</p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <p className="text-xs uppercase text-gray-500">Total Change Events</p>
+                <p className="text-lg font-semibold text-gray-900">{changes.length}</p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <p className="text-xs uppercase text-gray-500">Most Active Category</p>
+                <p className="text-base font-semibold text-gray-900">{topCategory}</p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <p className="text-xs uppercase text-gray-500">Total Line Changes</p>
+                <p className="text-lg font-semibold text-gray-900">{totalLineChanges}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Instructions */}
         {changes.length === 0 && !isLoading && (
