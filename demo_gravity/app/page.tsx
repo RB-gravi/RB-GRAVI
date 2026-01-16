@@ -21,6 +21,7 @@ import {
   GitPullRequest,
   Sparkles,
   Search,
+  X,
 } from "lucide-react"
 
 interface FileNode {
@@ -219,6 +220,7 @@ export default function AutoMarketingSpecRepo() {
   const [hasChanges, setHasChanges] = useState(false)
   const [notifications, setNotifications] = useState<string[]>([])
   const [fileSearch, setFileSearch] = useState("")
+  const quickFilters = ["components/", "lib/", "hooks/", "styles/"]
 
   useEffect(() => {
     if (selectedFile?.content) {
@@ -268,6 +270,12 @@ export default function AutoMarketingSpecRepo() {
     }
 
     return null
+  }
+
+  const countFiles = (node: FileNode | null): number => {
+    if (!node) return 0
+    if (node.type === "file") return 1
+    return node.children?.reduce((total, child) => total + countFiles(child), 0) ?? 0
   }
 
   const handleContentChange = (value: string) => {
@@ -337,6 +345,11 @@ export default function AutoMarketingSpecRepo() {
     // Auto-switch to commits tab to show the result
     setTimeout(() => setActiveTab("commits"), 500)
   }
+
+  const normalizedSearch = fileSearch.trim().toLowerCase()
+  const filteredRepo = filterFileTree(initialRepo, normalizedSearch)
+  const totalFiles = countFiles(initialRepo)
+  const matchedFiles = countFiles(filteredRepo)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -411,21 +424,54 @@ export default function AutoMarketingSpecRepo() {
                 <CardHeader>
                   <CardTitle className="text-sm">Files</CardTitle>
                   <CardDescription>Search by filename to quickly locate files.</CardDescription>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder="Search files..."
-                      value={fileSearch}
-                      onChange={(event) => setFileSearch(event.target.value)}
-                      className="pl-8"
-                      aria-label="Search files"
-                    />
+                  <div className="mt-3 space-y-3">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Scanning {totalFiles} files</span>
+                      <span>{normalizedSearch ? `${matchedFiles} matches` : "Ready to search"}</span>
+                    </div>
+                    <div className="relative flex items-center gap-2 rounded-xl border border-transparent bg-white/80 px-2 py-1 shadow-sm ring-1 ring-muted transition focus-within:ring-2 focus-within:ring-blue-500/40">
+                      <Search className="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="search"
+                        placeholder="Search files, folders, or keywords..."
+                        value={fileSearch}
+                        onChange={(event) => setFileSearch(event.target.value)}
+                        className="h-10 border-0 bg-transparent px-1 text-sm shadow-none focus-visible:ring-0"
+                        aria-label="Search files"
+                      />
+                      {fileSearch ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setFileSearch("")}
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          aria-label="Clear search"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <span className="hidden text-xs text-muted-foreground sm:inline">⌘K</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {quickFilters.map((filter) => (
+                        <Button
+                          key={filter}
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setFileSearch(filter)}
+                          className="h-7 rounded-full px-3 text-xs"
+                        >
+                          {filter}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {(() => {
-                    const filteredRepo = filterFileTree(initialRepo, fileSearch.trim().toLowerCase())
                     if (!filteredRepo) {
                       return <p className="text-sm text-muted-foreground">No files match your search.</p>
                     }
