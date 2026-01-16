@@ -15,8 +15,8 @@ export default function MarketingDocsEditor() {
 
   const [docs, setDocs] = useState({
     "product-brief": {
-      title: "Product Brief - Q1 2024 Feature Release",
-      content: `# Product Brief: Q1 2024 Feature Release
+      title: "Product Brief - GraviTrack Q1 2024 Feature Release",
+      content: `# Product Brief: GraviTrack Q1 2024 Feature Release
 
 ## Executive Summary
 This quarter we're launching three major features to improve user engagement and retention.
@@ -58,7 +58,7 @@ Our main competitors lack integrated collaboration features, giving us a signifi
     },
     "launch-plan": {
       title: "Go-to-Market Strategy",
-      content: `# Go-to-Market Strategy: Q1 Feature Launch
+      content: `# Go-to-Market Strategy: GraviTrack Q1 Feature Launch
 
 ## Launch Strategy
 Multi-phase rollout starting with beta users, followed by general availability.
@@ -107,7 +107,7 @@ Multi-phase rollout starting with beta users, followed by general availability.
     },
     "messaging-guide": {
       title: "Messaging & Positioning Guide",
-      content: `# Messaging & Positioning Guide
+      content: `# Messaging & Positioning Guide for GraviTrack
 
 ## Brand Positioning
 We are the productivity platform that makes collaboration effortless for modern teams.
@@ -165,6 +165,25 @@ Transform how your team works together with intelligent tools that adapt to your
       lastModified: new Date().toISOString(),
     },
   })
+
+  const getDocInsights = (content: string) => {
+    const wordCount = content.trim().length === 0 ? 0 : content.trim().split(/\s+/).length
+    const sectionCount = content
+      .split("\n")
+      .filter((line) => line.trim().startsWith("## "))
+      .length
+    const subSectionCount = content
+      .split("\n")
+      .filter((line) => line.trim().startsWith("### "))
+      .length
+    const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200))
+
+    return {
+      wordCount,
+      sectionCount: sectionCount + subSectionCount,
+      readTimeMinutes,
+    }
+  }
 
   const handleContentChange = (docKey: string, newContent: string) => {
     setDocs((prev) => ({
@@ -234,8 +253,10 @@ Transform how your team works together with intelligent tools that adapt to your
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Marketing Documents Editor</h1>
-          <p className="text-gray-600">Edit your marketing docs and watch change summaries generate automatically</p>
+          <h1 className="text-3xl font-bold text-gray-900">GraviTrack Marketing Docs Studio</h1>
+          <p className="text-gray-600">
+            Edit your GraviTrack marketing docs and watch change summaries generate automatically
+          </p>
           <div className="flex items-center justify-center gap-4">
             <div className="relative">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -274,33 +295,52 @@ Transform how your team works together with intelligent tools that adapt to your
                 <TabsTrigger value="messaging-guide">Messaging Guide</TabsTrigger>
               </TabsList>
 
-              {Object.entries(docs).map(([key, doc]) => (
-                <TabsContent key={key} value={key} className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium">{doc.title}</h3>
-                      <p className="text-sm text-gray-500">
-                        Last modified: {new Date(doc.lastModified).toLocaleString()}
-                      </p>
-                    </div>
-                    <Button
-                      onClick={() => saveDocument(key)}
-                      disabled={!hasChanges}
-                      className="flex items-center gap-2"
-                    >
-                      <Save className="h-4 w-4" />
-                      Save Changes
-                    </Button>
-                  </div>
+              {Object.entries(docs).map(([key, doc]) => {
+                const insights = getDocInsights(doc.content)
 
-                  <Textarea
-                    value={doc.content}
-                    onChange={(e) => handleContentChange(key, e.target.value)}
-                    className="min-h-[500px] font-mono text-sm"
-                    placeholder="Start writing your marketing document..."
-                  />
-                </TabsContent>
-              ))}
+                return (
+                  <TabsContent key={key} value={key} className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-medium">{doc.title}</h3>
+                        <p className="text-sm text-gray-500">
+                          Last modified: {new Date(doc.lastModified).toLocaleString()}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => saveDocument(key)}
+                        disabled={!hasChanges}
+                        className="flex items-center gap-2"
+                      >
+                        <Save className="h-4 w-4" />
+                        Save Changes
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="rounded-lg border bg-white p-3">
+                        <p className="text-xs uppercase text-gray-500">Word Count</p>
+                        <p className="text-lg font-semibold text-gray-900">{insights.wordCount}</p>
+                      </div>
+                      <div className="rounded-lg border bg-white p-3">
+                        <p className="text-xs uppercase text-gray-500">Estimated Read Time</p>
+                        <p className="text-lg font-semibold text-gray-900">{insights.readTimeMinutes} min</p>
+                      </div>
+                      <div className="rounded-lg border bg-white p-3">
+                        <p className="text-xs uppercase text-gray-500">Sections</p>
+                        <p className="text-lg font-semibold text-gray-900">{insights.sectionCount}</p>
+                      </div>
+                    </div>
+
+                    <Textarea
+                      value={doc.content}
+                      onChange={(e) => handleContentChange(key, e.target.value)}
+                      className="min-h-[500px] font-mono text-sm"
+                      placeholder="Start writing your marketing document..."
+                    />
+                  </TabsContent>
+                )
+              })}
             </Tabs>
 
             {/* Uploaded Documents */}
