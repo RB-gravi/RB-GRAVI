@@ -136,6 +136,23 @@ const initialRepo: FileNode = {
           ],
         },
         {
+          name: "lib",
+          type: "folder",
+          children: [
+            {
+              name: "session-security.ts",
+              type: "file",
+              content: `export const rotateSessionToken = async (userId: string) => {
+  const session = await getActiveSession(userId);
+
+  if (!session) return null;
+
+  return replaceSessionToken(session.id);
+};`,
+            },
+          ],
+        },
+        {
           name: "pages",
           type: "folder",
           children: [
@@ -206,6 +223,39 @@ const sampleCommits: Commit[] = [
       releaseType: "Minor feature enhancement",
       suggestedMessaging: "Your story, your space. Add a personal bio to your profile and tell the world who you are!",
       impact: "Medium",
+      effort: "Low",
+    },
+  },
+  {
+    id: "sec248",
+    message: "Rotate session tokens after sensitive account updates",
+    author: "riley.sec",
+    timestamp: "1 hour ago",
+    files: ["src/lib/session-security.ts"],
+    diff: `@@ -1,5 +1,12 @@
+export const rotateSessionToken = async (userId: string) => {
+  const session = await getActiveSession(userId);
+
+  if (!session) return null;
+
+  return replaceSessionToken(session.id);
+};
+`,
+    marketingSpec: {
+      title: "Session Token Rotation Security Patch",
+      summary:
+        "We now rotate session tokens after password resets and email changes to reduce the risk of stale sessions being reused without authorization.",
+      benefits: [
+        "Prevents reuse of session tokens after sensitive updates",
+        "Reduces exposure window in case of compromised credentials",
+        "Aligns account security with compliance best practices",
+      ],
+      targetAudience: "Security-conscious admins and all signed-in users",
+      affectedAreas: ["Authentication", "Account Settings"],
+      releaseType: "Security fix",
+      suggestedMessaging:
+        "Security update: sessions are now refreshed after password or email changes to keep accounts protected.",
+      impact: "High",
       effort: "Low",
     },
   },
