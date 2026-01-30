@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   GitBranch,
   GitCommit,
@@ -220,6 +221,7 @@ export default function AutoMarketingSpecRepo() {
   const [hasChanges, setHasChanges] = useState(false)
   const [notifications, setNotifications] = useState<string[]>([])
   const [fileSearch, setFileSearch] = useState("")
+  const [searchScope, setSearchScope] = useState<"name" | "content">("name")
   const quickFilters = ["components/", "lib/", "hooks/", "styles/"]
 
   useEffect(() => {
@@ -249,17 +251,26 @@ export default function AutoMarketingSpecRepo() {
     )
   }
 
-  const filterFileTree = (node: FileNode, query: string): FileNode | null => {
+  const filterFileTree = (
+    node: FileNode,
+    query: string,
+    scope: "name" | "content"
+  ): FileNode | null => {
     if (!query) return node
 
-    const matches = node.name.toLowerCase().includes(query)
+    const matchesName = node.name.toLowerCase().includes(query)
+    const matchesContent =
+      scope === "content" && node.type === "file"
+        ? node.content?.toLowerCase().includes(query)
+        : false
+    const matches = matchesName || matchesContent
 
     if (node.type === "file") {
       return matches ? node : null
     }
 
     const filteredChildren = node.children
-      ?.map((child) => filterFileTree(child, query))
+      ?.map((child) => filterFileTree(child, query, scope))
       .filter((child): child is FileNode => child !== null)
 
     if (matches || (filteredChildren && filteredChildren.length > 0)) {
@@ -347,7 +358,7 @@ export default function AutoMarketingSpecRepo() {
   }
 
   const normalizedSearch = fileSearch.trim().toLowerCase()
-  const filteredRepo = filterFileTree(initialRepo, normalizedSearch)
+  const filteredRepo = filterFileTree(initialRepo, normalizedSearch, searchScope)
   const totalFiles = countFiles(initialRepo)
   const matchedFiles = countFiles(filteredRepo)
 
@@ -453,6 +464,35 @@ export default function AutoMarketingSpecRepo() {
                       ) : (
                         <span className="hidden text-xs text-muted-foreground sm:inline">⌘K</span>
                       )}
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Scope
+                        </span>
+                        <ToggleGroup
+                          type="single"
+                          value={searchScope}
+                          onValueChange={(value) => {
+                            if (value) setSearchScope(value as "name" | "content")
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="justify-start"
+                        >
+                          <ToggleGroupItem value="name" aria-label="Search file and folder names">
+                            Names only
+                          </ToggleGroupItem>
+                          <ToggleGroupItem value="content" aria-label="Search file contents and names">
+                            Names + content
+                          </ToggleGroupItem>
+                        </ToggleGroup>
+                      </div>
+                      <span>
+                        {searchScope === "content"
+                          ? "Content search scans file bodies for keywords."
+                          : "Name search keeps results fast and focused."}
+                      </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {quickFilters.map((filter) => (
