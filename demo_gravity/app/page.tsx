@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback, useDeferredValue } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -57,6 +57,12 @@ interface MarketingSpec {
 interface SpecChecklistItem {
   label: string
   met: boolean
+}
+
+interface FileIndexEntry {
+  path: string
+  normalizedPath: string
+  normalizedContent: string
 }
 
 const getSpecChecklist = (spec: MarketingSpec): SpecChecklistItem[] => [
@@ -273,6 +279,29 @@ export default function AutoMarketingSpecRepo() {
   const [fileSearch, setFileSearch] = useState("")
   const [searchScope, setSearchScope] = useState<"name" | "content">("name")
   const quickFilters = ["components/", "lib/", "hooks/", "styles/"]
+  const deferredSearch = useDeferredValue(fileSearch)
+
+  const fileIndex = useMemo(() => {
+    const index: FileIndexEntry[] = []
+
+    const walk = (node: FileNode, parentPath = "") => {
+      const path = parentPath ? `${parentPath}/${node.name}` : node.name
+
+      if (node.type === "file") {
+        index.push({
+          path,
+          normalizedPath: path.toLowerCase(),
+          normalizedContent: node.content?.toLowerCase() ?? "",
+        })
+        return
+      }
+
+      node.children?.forEach((child) => walk(child, path))
+    }
+
+    walk(initialRepo)
+    return index
+  }, [])
 
   useEffect(() => {
     if (selectedFile?.content) {
@@ -280,64 +309,58 @@ export default function AutoMarketingSpecRepo() {
     }
   }, [selectedFile])
 
-  const renderFileTree = (node: FileNode, depth = 0) => {
-    return (
-      <div key={node.name} style={{ marginLeft: depth * 16 }}>
-        <div
-          className={`flex items-center gap-2 p-1 rounded cursor-pointer hover:bg-gray-100 ${
-            selectedFile?.name === node.name ? "bg-blue-50" : ""
-          }`}
-          onClick={() => node.type === "file" && setSelectedFile(node)}
-        >
-          {node.type === "folder" ? (
-            <Folder className="h-4 w-4 text-blue-600" />
-          ) : (
-            <FileText className="h-4 w-4 text-gray-600" />
-          )}
-          <span className="text-sm">{node.name}</span>
+  const renderFileTree = useCallback(
+    (node: FileNode, depth = 0, parentPath = "") => {
+      const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name
+
+      return (
+        <div key={currentPath} style={{ marginLeft: depth * 16 }}>
+          <div
+            className={`flex items-center gap-2 p-1 rounded cursor-pointer hover:bg-gray-100 ${
+              selectedFile?.name === node.name ? "bg-blue-50" : ""
+            }`}
+            onClick={() => node.type === "file" && setSelectedFile(node)}
+          >
+            {node.type === "folder" ? (
+              <Folder className="h-4 w-4 text-blue-600" />
+            ) : (
+              <FileText className="h-4 w-4 text-gray-600" />
+            )}
+            <span className="text-sm">{node.name}</span>
+          </div>
+          {node.children?.map((child) => renderFileTree(child, depth + 1, currentPath))}
         </div>
-        {node.children?.map((child) => renderFileTree(child, depth + 1))}
-      </div>
-    )
-  }
+      )
+    },
+    [selectedFile?.name]
+  )
 
-  const filterFileTree = (
-    node: FileNode,
-    query: string,
-    scope: "name" | "content"
-  ): FileNode | null => {
-    if (!query) return node
+  const filterFileTree = useCallback(
+    (node: FileNode, query: string, matcher: (path: string, content: string) => boolean, parentPath = ""): FileNode | null => {
+      if (!query) return node
 
-    const matchesName = node.name.toLowerCase().includes(query)
-    const matchesContent =
-      scope === "content" && node.type === "file"
-        ? node.content?.toLowerCase().includes(query)
-        : false
-    const matches = matchesName || matchesContent
+      const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name
 
-    if (node.type === "file") {
-      return matches ? node : null
-    }
-
-    const filteredChildren = node.children
-      ?.map((child) => filterFileTree(child, query, scope))
-      .filter((child): child is FileNode => child !== null)
-
-    if (matches || (filteredChildren && filteredChildren.length > 0)) {
-      return {
-        ...node,
-        children: filteredChildren ?? [],
+      if (node.type === "file") {
+        return matcher(currentPath.toLowerCase(), node.content?.toLowerCase() ?? "") ? node : null
       }
-    }
 
-    return null
-  }
+      const filteredChildren = node.children
+        ?.map((child) => filterFileTree(child, query, matcher, currentPath))
+        .filter((child): child is FileNode => child !== null)
 
-  const countFiles = (node: FileNode | null): number => {
-    if (!node) return 0
-    if (node.type === "file") return 1
-    return node.children?.reduce((total, child) => total + countFiles(child), 0) ?? 0
-  }
+      const folderMatches = currentPath.toLowerCase().includes(query)
+      if (folderMatches || (filteredChildren && filteredChildren.length > 0)) {
+        return {
+          ...node,
+          children: filteredChildren ?? [],
+        }
+      }
+
+      return null
+    },
+    []
+  )
 
   const handleContentChange = (value: string) => {
     setEditedContent(value)
@@ -395,7 +418,7 @@ export default function AutoMarketingSpecRepo() {
       marketingSpec: newMarketingSpec,
     }
 
-    setCommits([newCommit, ...commits])
+    setCommits((prev) => [newCommit, ...prev])
     setCommitMessage("")
     setHasChanges(false)
     setIsCommitting(false)
@@ -407,10 +430,34 @@ export default function AutoMarketingSpecRepo() {
     setTimeout(() => setActiveTab("commits"), 500)
   }
 
-  const normalizedSearch = fileSearch.trim().toLowerCase()
-  const filteredRepo = filterFileTree(initialRepo, normalizedSearch, searchScope)
-  const totalFiles = countFiles(initialRepo)
-  const matchedFiles = countFiles(filteredRepo)
+  const normalizedSearch = deferredSearch.trim().toLowerCase()
+  const fileMatcher = useCallback(
+    (path: string, content: string) =>
+      searchScope === "content" ? path.includes(normalizedSearch) || content.includes(normalizedSearch) : path.includes(normalizedSearch),
+    [normalizedSearch, searchScope]
+  )
+
+  const filteredRepo = useMemo(
+    () => filterFileTree(initialRepo, normalizedSearch, fileMatcher),
+    [normalizedSearch, filterFileTree, fileMatcher]
+  )
+
+  const totalFiles = fileIndex.length
+  const matchedFiles = useMemo(() => {
+    if (!normalizedSearch) return totalFiles
+    return fileIndex.filter((file) => fileMatcher(file.normalizedPath, file.normalizedContent)).length
+  }, [normalizedSearch, totalFiles, fileIndex, fileMatcher])
+
+  const marketingSpecs = useMemo(
+    () => commits.filter((commit): commit is Commit & { marketingSpec: MarketingSpec } => Boolean(commit.marketingSpec)),
+    [commits]
+  )
+
+  const averageSpecScore = useMemo(() => {
+    if (marketingSpecs.length === 0) return 0
+    const totalScore = marketingSpecs.reduce((sum, commit) => sum + getSpecScore(commit.marketingSpec), 0)
+    return Math.round(totalScore / marketingSpecs.length)
+  }, [marketingSpecs])
 
   return (
     <div className="min-h-screen bg-gray-50">
