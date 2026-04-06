@@ -16,6 +16,7 @@ import {
   CheckCircle,
   TrendingUp,
   MessageSquare,
+  Trash2,
 } from "lucide-react"
 
 interface DocumentChange {
@@ -37,8 +38,11 @@ interface DocumentChange {
 export default function ChangeTracker() {
   const [changes, setChanges] = useState<DocumentChange[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null)
 
   const loadChanges = async () => {
+    setIsRefreshing(true)
     try {
       const response = await fetch("/api/changes")
       if (response.ok) {
@@ -49,6 +53,21 @@ export default function ChangeTracker() {
       console.error("Failed to load changes:", error)
     } finally {
       setIsLoading(false)
+      setIsRefreshing(false)
+      setLastRefreshed(new Date())
+    }
+  }
+
+  const clearChanges = async () => {
+    try {
+      const response = await fetch("/api/changes", { method: "DELETE" })
+      if (response.ok) {
+        await loadChanges()
+      } else {
+        console.error("Failed to clear changes, status:", response.status)
+      }
+    } catch (error) {
+      console.error("Failed to clear changes:", error)
     }
   }
 
@@ -156,6 +175,20 @@ ${change.removedLines.map((line) => `- ${line}`).join("\n")}
           <h1 className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2">
             <Eye className="h-8 w-8 text-blue-600" />
             GraviTrack Change Tracker
+            <Badge
+              className={`ml-2 flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 ${
+                isRefreshing
+                  ? "bg-green-100 text-green-600 opacity-60"
+                  : "bg-green-100 text-green-700"
+              }`}
+            >
+              <span
+                className={`inline-block h-2 w-2 rounded-full bg-green-500 ${
+                  isRefreshing ? "" : "animate-pulse"
+                }`}
+              />
+              Live
+            </Badge>
           </h1>
           <p className="text-gray-600">Automatically track and summarize changes to your GraviTrack documents</p>
           <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
@@ -166,6 +199,10 @@ ${change.removedLines.map((line) => `- ${line}`).join("\n")}
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
               Last updated: {changes.length > 0 ? formatTime(changes[0].timestamp) : "Never"}
+            </div>
+            <div className="flex items-center gap-1">
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              Last refreshed: {lastRefreshed ? lastRefreshed.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}
             </div>
           </div>
         </div>
@@ -182,6 +219,16 @@ ${change.removedLines.map((line) => `- ${line}`).join("\n")}
               Edit Documents
             </a>
           </Button>
+          {changes.length > 0 && (
+            <Button
+              onClick={clearChanges}
+              variant="outline"
+              className="flex items-center gap-2 border-red-300 text-red-600 hover:bg-red-50 bg-transparent"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear All Changes
+            </Button>
+          )}
         </div>
 
         <Card className="max-w-4xl mx-auto">
