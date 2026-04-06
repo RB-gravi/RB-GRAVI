@@ -195,7 +195,11 @@ function saveChange(changeSummary) {
   // Keep only the latest 20 changes
   changes = changes.slice(0, 20)
 
-  fs.writeFileSync(changesPath, JSON.stringify(changes, null, 2))
+  try {
+    fs.writeFileSync(changesPath, JSON.stringify(changes, null, 2))
+  } catch (error) {
+    console.error("❌ Failed to save change to disk:", error)
+  }
 }
 
 // Watch for file changes
@@ -228,3 +232,23 @@ watcher
 console.log("\n🚀 Document watcher is running!")
 console.log("💡 Edit marketing documents to see change summaries generated automatically")
 console.log("🌐 View change summaries at http://localhost:3001")
+
+// Handle watcher errors
+watcher.on("error", (error) => {
+  console.error("❌ Watcher error:", error)
+})
+
+// Graceful shutdown
+function shutdown() {
+  console.log("\n🛑 Shutting down document watcher...")
+  watcher.close().then(() => {
+    console.log("✅ Watcher closed.")
+    process.exit(0)
+  }).catch((error) => {
+    console.error("❌ Error closing watcher:", error)
+    process.exit(1)
+  })
+}
+
+process.on("SIGTERM", shutdown)
+process.on("SIGINT", shutdown)

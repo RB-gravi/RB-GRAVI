@@ -7,6 +7,9 @@ const { execSync } = require("child_process")
 const watchPath = path.join(__dirname, "../../sample-app")
 const specsPath = path.join(__dirname, "../generated-specs")
 
+// Maximum number of spec files to keep on disk
+const MAX_SPEC_FILES = 50
+
 // Ensure specs directory exists
 if (!fs.existsSync(specsPath)) {
   fs.mkdirSync(specsPath, { recursive: true })
@@ -42,12 +45,20 @@ function generateMarketingSpec(filePath, changeType) {
   const specFileName = `${fileName.replace(/\.[^/.]+$/, "")}-${Date.now()}.json`
   const specFilePath = path.join(specsPath, specFileName)
 
-  fs.writeFileSync(specFilePath, JSON.stringify(spec, null, 2))
+  try {
+    fs.writeFileSync(specFilePath, JSON.stringify(spec, null, 2))
+  } catch (error) {
+    console.error("❌ Failed to write spec file:", error)
+    return
+  }
 
   console.log(`\n✨ Generated marketing spec: ${specFileName}`)
   console.log(`📄 File: ${relativePath}`)
   console.log(`🎯 Feature: ${spec.title}`)
   console.log(`💡 Impact: ${spec.impact}`)
+
+  // Prune old spec files from disk to prevent unbounded accumulation
+  pruneSpecFiles()
 
   // Also update the latest specs for the web interface
   updateLatestSpecs(spec)
@@ -171,6 +182,24 @@ function analyzeCodeChange(fileName, content, changeType, relativePath) {
   return spec
 }
 
+function pruneSpecFiles() {
+  try {
+    const files = fs
+      .readdirSync(specsPath)
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => ({ name: f, mtime: fs.statSync(path.join(specsPath, f)).mtimeMs }))
+      .sort((a, b) => b.mtime - a.mtime)
+
+    const toDelete = files.slice(MAX_SPEC_FILES)
+    for (const file of toDelete) {
+      fs.unlinkSync(path.join(specsPath, file.name))
+      console.log(`🧹 Pruned old spec file: ${file.name}`)
+    }
+  } catch (error) {
+    console.error("❌ Failed to prune spec files:", error)
+  }
+}
+
 function updateLatestSpecs(spec) {
   const latestSpecsPath = path.join(__dirname, "../app/data/latest-specs.json")
 
@@ -194,7 +223,11 @@ function updateLatestSpecs(spec) {
     fs.mkdirSync(dir, { recursive: true })
   }
 
-  fs.writeFileSync(latestSpecsPath, JSON.stringify(latestSpecs, null, 2))
+  try {
+    fs.writeFileSync(latestSpecsPath, JSON.stringify(latestSpecs, null, 2))
+  } catch (error) {
+    console.error("❌ Failed to update latest specs:", error)
+  }
 }
 
 // Watch for file changes
@@ -214,3 +247,23 @@ watcher
 console.log("\n🚀 File watcher is running!")
 console.log("💡 Try editing files in packages/sample-app/ to see marketing specs generated automatically")
 console.log("🌐 View generated specs at http://localhost:3001")
+
+// Handle watcher errors
+watcher.on("error", (error) => {
+  console.error("❌ Watcher error:", error)
+})
+
+// Graceful shutdown
+function shutdown() {
+  console.log("\n🛑 Shutting down spec generator watcher...")
+  watcher.close().then(() => {
+    console.log("✅ Watcher closed.")
+    process.exit(0)
+  }).catch((error) => {
+    console.error("❌ Error closing watcher:", error)
+    process.exit(1)
+  })
+}
+
+process.on("SIGTERM", shutdown)
+process.on("SIGINT", shutdown)
