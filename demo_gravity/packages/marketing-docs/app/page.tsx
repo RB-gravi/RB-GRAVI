@@ -199,17 +199,24 @@ Transform how your team works together with intelligent tools that adapt to your
   const saveDocument = async (docKey: string) => {
     // Save to file system
     const doc = docs[docKey]
-    const response = await fetch("/api/save-doc", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        filename: `${docKey}.md`,
-        content: doc.content,
-        title: doc.title,
-      }),
-    })
+    let response: Response
+    try {
+      response = await fetch("/api/save-doc", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filename: `${docKey}.md`,
+          content: doc.content,
+          title: doc.title,
+        }),
+      })
+    } catch (error) {
+      console.error("Failed to save document:", error)
+      alert("Failed to save document. Please try again.")
+      return
+    }
 
     if (response.ok) {
       setDocs((prev) => ({
@@ -223,6 +230,9 @@ Transform how your team works together with intelligent tools that adapt to your
 
       // Show success message
       alert("Document saved! Check the change tracker for updates.")
+    } else {
+      console.error("Failed to save document, status:", response.status)
+      alert(`Failed to save document (server error ${response.status}). Please try again.`)
     }
   }
 
@@ -230,7 +240,15 @@ Transform how your team works together with intelligent tools that adapt to your
     const file = event.target.files?.[0]
     if (!file) return
 
-    const content = await file.text()
+    let content: string
+    try {
+      content = await file.text()
+    } catch (error) {
+      console.error("Failed to read uploaded file:", error)
+      alert(`Failed to read "${file.name}". The file may be unreadable or corrupted.`)
+      return
+    }
+
     const docKey = file.name.replace(/\.[^/.]+$/, "")
 
     setDocs((prev) => ({
