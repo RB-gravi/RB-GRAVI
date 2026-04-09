@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
+
+/**
+ * HTTP security headers applied to every response when the
+ * FEATURE_ENABLE_SECURITY_HARDENING flag is enabled.
+ */
 const securityHeaders = [
   {
     key: "X-Content-Type-Options",
@@ -38,6 +43,9 @@ const securityHeaders = [
   },
 ]
 
+const securityHardeningEnabled =
+  process.env.FEATURE_ENABLE_SECURITY_HARDENING?.toLowerCase() === "true"
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -49,6 +57,9 @@ const nextConfig = {
     unoptimized: true,
   },
   async headers() {
+    if (!securityHardeningEnabled) {
+      return []
+    }
     return [
       {
         source: "/(.*)",
