@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback, useDeferredValue } from "react"
+import { useFeatureFlag } from "@/hooks/use-feature-flag"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -268,6 +269,7 @@ export const rotateSessionToken = async (userId: string) => {
 ]
 
 export default function AutoMarketingSpecRepo() {
+  const enableNewFeature = useFeatureFlag("enableNewFeature")
   const [activeTab, setActiveTab] = useState("code")
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null)
   const [commits, setCommits] = useState<Commit[]>(sampleCommits)
@@ -471,6 +473,12 @@ export default function AutoMarketingSpecRepo() {
                 <span className="font-semibold">acme-org/saas-app</span>
               </div>
               <Badge variant="secondary">main</Badge>
+              {enableNewFeature && (
+                <Badge variant="default" className="bg-green-600">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  New Feature
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2">
               {notifications.length > 0 && (
