@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback, useDeferredValue } from "react"
+import Link from "next/link"
 import { useFeatureFlag } from "@/hooks/use-feature-flag"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -492,6 +493,9 @@ export default function AutoMarketingSpecRepo() {
               <Button variant="outline" size="sm">
                 <Eye className="h-4 w-4 mr-1" />
                 Watch
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/security">Security</Link>
               </Button>
               <Button variant="outline" size="sm">
                 <GitPullRequest className="h-4 w-4 mr-1" />
