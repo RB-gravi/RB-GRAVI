@@ -25,6 +25,7 @@ import {
   Sparkles,
   Search,
   X,
+  Menu,
 } from "lucide-react"
 
 interface FileNode {
@@ -279,6 +280,9 @@ export default function AutoMarketingSpecRepo() {
   const [editedContent, setEditedContent] = useState("")
   const [hasChanges, setHasChanges] = useState(false)
   const [notifications, setNotifications] = useState<string[]>([])
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const [swipeStartX, setSwipeStartX] = useState<number | null>(null)
+  const [swipeCurrentX, setSwipeCurrentX] = useState<number | null>(null)
   const [fileSearch, setFileSearch] = useState("")
   const [searchScope, setSearchScope] = useState<"name" | "content">("name")
   const quickFilters = ["components/", "lib/", "hooks/", "styles/"]
@@ -462,8 +466,108 @@ export default function AutoMarketingSpecRepo() {
     return Math.round(totalScore / marketingSpecs.length)
   }, [marketingSpecs])
 
+  const swipeOffset = swipeStartX !== null && swipeCurrentX !== null ? Math.max(0, swipeCurrentX - swipeStartX) : 0
+
+  const handleMobileNavTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0]
+    setSwipeStartX(touch.clientX)
+    setSwipeCurrentX(touch.clientX)
+  }
+
+  const handleMobileNavTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (swipeStartX === null) return
+    setSwipeCurrentX(event.touches[0].clientX)
+  }
+
+  const handleMobileNavTouchEnd = () => {
+    if (swipeStartX !== null && swipeCurrentX !== null && swipeCurrentX - swipeStartX > 80) {
+      setIsMobileNavOpen(false)
+    }
+    setSwipeStartX(null)
+    setSwipeCurrentX(null)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <div
+        className={`fixed inset-0 z-50 md:hidden ${isMobileNavOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+        aria-hidden={!isMobileNavOpen}
+      >
+        <button
+          type="button"
+          onClick={() => setIsMobileNavOpen(false)}
+          className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+            isMobileNavOpen ? "opacity-100" : "opacity-0"
+          }`}
+          aria-label="Close mobile navigation overlay"
+        />
+        <div
+          className={`absolute inset-0 bg-background transition-transform duration-300 ease-out ${
+            isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+          onTouchStart={handleMobileNavTouchStart}
+          onTouchMove={handleMobileNavTouchMove}
+          onTouchEnd={handleMobileNavTouchEnd}
+          style={swipeOffset > 0 ? { transform: `translateX(${Math.min(swipeOffset, 320)}px)` } : undefined}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation menu"
+        >
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between border-b px-4 py-4">
+              <div className="flex items-center gap-2">
+                <GitBranch className="h-5 w-5" />
+                <span className="font-semibold">Navigation</span>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsMobileNavOpen(false)} aria-label="Close menu">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="flex-1 space-y-6 overflow-y-auto px-4 py-6">
+              <section className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Repository</p>
+                <div className="space-y-2">
+                  <Button variant="ghost" className="h-11 w-full justify-start" onClick={() => setIsMobileNavOpen(false)}>
+                    Overview
+                  </Button>
+                  <Button variant="ghost" className="h-11 w-full justify-start" asChild>
+                    <Link href="/security" onClick={() => setIsMobileNavOpen(false)}>
+                      Security
+                    </Link>
+                  </Button>
+                </div>
+              </section>
+
+              <Separator />
+
+              <section className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</p>
+                <div className="space-y-2">
+                  <Button variant="outline" className="h-11 w-full justify-start">
+                    <Eye className="mr-2 h-4 w-4" />
+                    Watch Repository
+                  </Button>
+                  <Button variant="outline" className="h-11 w-full justify-start">
+                    <GitPullRequest className="mr-2 h-4 w-4" />
+                    Open Pull Request
+                  </Button>
+                </div>
+              </section>
+
+              <Separator />
+
+              <section className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Activity</p>
+                <div className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+                  {notifications.length > 0 ? `${notifications.length} new notifications` : "No new notifications"}
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -481,7 +585,7 @@ export default function AutoMarketingSpecRepo() {
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 md:flex">
               {notifications.length > 0 && (
                 <div className="relative">
                   <Bell className="h-5 w-5 text-orange-500" />
@@ -500,6 +604,16 @@ export default function AutoMarketingSpecRepo() {
               <Button variant="outline" size="sm">
                 <GitPullRequest className="h-4 w-4 mr-1" />
                 Pull Request
+              </Button>
+            </div>
+            <div className="md:hidden">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsMobileNavOpen(true)}
+                aria-label="Open navigation menu"
+              >
+                <Menu className="h-5 w-5" />
               </Button>
             </div>
           </div>
