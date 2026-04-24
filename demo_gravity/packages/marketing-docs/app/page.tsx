@@ -7,11 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Upload, Save, Eye } from "lucide-react"
+import { FileText, Upload, Save, Eye, Loader2 } from "lucide-react"
 
 export default function MarketingDocsEditor() {
   const [activeDoc, setActiveDoc] = useState("product-brief")
   const [hasChanges, setHasChanges] = useState(false)
+  const [savingDocKey, setSavingDocKey] = useState<string | null>(null)
 
   const [docs, setDocs] = useState({
     "product-brief": {
@@ -197,6 +198,8 @@ Transform how your team works together with intelligent tools that adapt to your
   }
 
   const saveDocument = async (docKey: string) => {
+    setSavingDocKey(docKey)
+
     // Save to file system
     const doc = docs[docKey]
     let response: Response
@@ -215,6 +218,7 @@ Transform how your team works together with intelligent tools that adapt to your
     } catch (error) {
       console.error("Failed to save document:", error)
       alert("Failed to save document. Please try again.")
+      setSavingDocKey(null)
       return
     }
 
@@ -234,6 +238,8 @@ Transform how your team works together with intelligent tools that adapt to your
       console.error("Failed to save document, status:", response.status)
       alert(`Failed to save document (server error ${response.status}). Please try again.`)
     }
+
+    setSavingDocKey(null)
   }
 
   const uploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,11 +333,20 @@ Transform how your team works together with intelligent tools that adapt to your
                       </div>
                       <Button
                         onClick={() => saveDocument(key)}
-                        disabled={!hasChanges}
+                        disabled={!hasChanges || savingDocKey !== null}
                         className="flex items-center gap-2"
                       >
-                        <Save className="h-4 w-4" />
-                        Save Changes
+                        {savingDocKey === key ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4" />
+                            Save Changes
+                          </>
+                        )}
                       </Button>
                     </div>
 
