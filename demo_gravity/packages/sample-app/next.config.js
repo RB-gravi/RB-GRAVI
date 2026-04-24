@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const ONE_YEAR_IN_SECONDS = 31536000
+
 const securityHeaders = [
   {
     key: "X-Content-Type-Options",
@@ -38,6 +40,27 @@ const securityHeaders = [
   },
 ]
 
+const staticAssetCacheHeaders = [
+  {
+    source: "/_next/static/:path*",
+    headers: [
+      {
+        key: "Cache-Control",
+        value: `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`,
+      },
+    ],
+  },
+  {
+    source: "/:path*.(?:js|css|woff|woff2|ttf|otf|eot|svg|ico|jpg|jpeg|png|webp|avif|gif)",
+    headers: [
+      {
+        key: "Cache-Control",
+        value: "public, max-age=0, must-revalidate",
+      },
+    ],
+  },
+]
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -48,8 +71,16 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.output.assetModuleFilename = "static/media/[name].[contenthash][ext]"
+    }
+
+    return config
+  },
   async headers() {
     return [
+      ...staticAssetCacheHeaders,
       {
         source: "/(.*)",
         headers: securityHeaders,

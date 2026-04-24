@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 
+const ONE_YEAR_IN_SECONDS = 31536000
+
 /**
  * HTTP security headers applied to every response when the
  * FEATURE_ENABLE_SECURITY_HARDENING flag is enabled.
@@ -43,6 +45,27 @@ const securityHeaders = [
   },
 ]
 
+const staticAssetCacheHeaders = [
+  {
+    source: "/_next/static/:path*",
+    headers: [
+      {
+        key: "Cache-Control",
+        value: `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`,
+      },
+    ],
+  },
+  {
+    source: "/:path*.(?:js|css|woff|woff2|ttf|otf|eot|svg|ico|jpg|jpeg|png|webp|avif|gif)",
+    headers: [
+      {
+        key: "Cache-Control",
+        value: "public, max-age=0, must-revalidate",
+      },
+    ],
+  },
+]
+
 const securityHardeningEnabled =
   process.env.FEATURE_ENABLE_SECURITY_HARDENING?.toLowerCase() === "true"
 
@@ -56,16 +79,24 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  async headers() {
-    if (!securityHardeningEnabled) {
-      return []
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.output.assetModuleFilename = "static/media/[name].[contenthash][ext]"
     }
-    return [
-      {
-        source: "/(.*)",
-        headers: securityHeaders,
-      },
-    ]
+
+    return config
+  },
+  async headers() {
+    const globalHeaders = securityHardeningEnabled
+      ? [
+          {
+            source: "/(.*)",
+            headers: securityHeaders,
+          },
+        ]
+      : []
+
+    return [...staticAssetCacheHeaders, ...globalHeaders]
   },
 }
 
