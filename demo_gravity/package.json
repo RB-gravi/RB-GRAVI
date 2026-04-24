@@ -6,7 +6,9 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "build:css": "postcss styles/bundle.css --env production --dir public/assets --base styles --ext .min.css",
+    "prebuild": "npm run build:css"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
