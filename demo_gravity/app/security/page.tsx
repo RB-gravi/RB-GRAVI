@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
   title: "Security | Gravity",
-  description: "Learn how Gravity protects customer data and supports enterprise security requirements.",
+  description:
+    "Review Gravity's enterprise security posture, including encryption, access controls, monitoring, and governance practices for rigorous procurement reviews.",
 }
 
 const securityPillars = [
