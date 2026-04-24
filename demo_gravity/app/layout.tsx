@@ -6,8 +6,9 @@ import { resolveFeatureFlags } from '@/lib/featureFlags'
 import { FeatureFlagProvider } from '@/hooks/use-feature-flag'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Gravity',
+  description:
+    'Gravity helps product teams turn code changes into launch-ready marketing updates faster with AI-generated specs, messaging, and collaboration workflows.',
   generator: 'v0.dev',
 }
 
