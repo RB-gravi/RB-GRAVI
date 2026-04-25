@@ -47,6 +47,12 @@ const proofPoints = [
   "Consistent messaging across every release touchpoint",
 ]
 
+const momentumStats = [
+  { label: "Avg. launch prep time saved", value: "11 hrs" },
+  { label: "Teams aligned per release", value: "4+" },
+  { label: "Messaging consistency score", value: "92%" },
+]
+
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -63,7 +69,9 @@ export default function HomePage() {
           </Button>
         </header>
 
-        <section className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-background to-background p-6 sm:p-8 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-8 lg:p-10">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-12 -left-10 h-36 w-36 rounded-full bg-primary/10 blur-3xl" />
           <div className="space-y-6">
             <Badge variant="secondary" className="w-fit">
               Built for product-led teams
@@ -96,7 +104,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <Card className="border-primary/20 bg-primary/5 shadow-sm">
+          <Card className="border-primary/20 bg-background/80 shadow-sm backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Launch Readiness Snapshot</CardTitle>
               <CardDescription>Get a single view of message quality before your release goes live.</CardDescription>
@@ -124,6 +132,25 @@ export default function HomePage() {
               </div>
             </CardContent>
           </Card>
+        </section>
+
+        <section aria-labelledby="momentum-heading" className="space-y-4">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-primary">Momentum at a glance</p>
+            <h2 id="momentum-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Keep every launch moving with measurable release communication wins.
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {momentumStats.map((stat) => (
+              <Card key={stat.label} className="border-primary/15 bg-card/80">
+                <CardContent className="space-y-2 p-5">
+                  <p className="text-3xl font-semibold tracking-tight text-primary">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </section>
 
         <section className="space-y-6" aria-labelledby="value-proposition-heading">
