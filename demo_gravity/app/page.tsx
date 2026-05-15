@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, Clock3, ShieldCheck, Sparkles, Target, Zap } 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 
 const valuePillars = [
   {
@@ -45,6 +46,21 @@ const proofPoints = [
   "Shared product + marketing context in one workflow",
   "Faster launch prep with automated readiness checks",
   "Consistent messaging across every release touchpoint",
+]
+
+const readinessChecklist = [
+  {
+    item: "Core release changes mapped to customer-facing value",
+    progress: 96,
+  },
+  {
+    item: "Stakeholder owners assigned for launch channels",
+    progress: 88,
+  },
+  {
+    item: "Enablement copy drafted for support and sales",
+    progress: 82,
+  },
 ]
 
 const momentumStats = [
@@ -149,6 +165,26 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="checklist-heading" className="space-y-5 rounded-2xl border bg-card/60 p-6 sm:p-8">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-primary">Release checklist</p>
+            <h2 id="checklist-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Track launch readiness across every team before go-live.
+            </h2>
+          </div>
+          <div className="grid gap-4">
+            {readinessChecklist.map((check) => (
+              <div key={check.item} className="space-y-2 rounded-lg border bg-background p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">{check.item}</p>
+                  <span className="text-sm font-semibold text-primary">{check.progress}%</span>
+                </div>
+                <Progress value={check.progress} aria-label={check.item} />
+              </div>
             ))}
           </div>
         </section>
