@@ -142,13 +142,12 @@ export default function HomePage() {
           <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-12 -left-10 h-36 w-36 rounded-full bg-primary/10 blur-3xl" />
           <div className="space-y-6">
-            <Badge variant="secondary" className="w-fit">Built for product-led teams</Badge>
+            <Badge variant="secondary" className="w-fit">Fresh launch copy for product-led teams</Badge>
             <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              Translate product changes into launch-ready stories your customers understand.
+              Turn every product update into a clear customer story—before launch day.
             </h1>
             <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
-              GravityLink helps teams connect code changes to customer value, improve cross-functional launch flow, and
-              drive every release toward a clear call to action.
+              GravityLink helps teams transform release notes into value-driven messaging, align stakeholders faster, and ship launches with confidence.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" asChild>
