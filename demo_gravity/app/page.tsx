@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { resolveFeatureFlags } from "@/lib/featureFlags"
 
 const valuePillars = [
   {
@@ -69,20 +70,27 @@ const momentumStats = [
   { label: "Messaging consistency score", value: "92%" },
 ]
 
+const partnerLogos = ["Northstar Labs", "ClarityOS", "Helio Commerce", "Summit Cloud", "PulsePath"]
+
 export default function HomePage() {
+  const { enableNewFeature } = resolveFeatureFlags()
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-16 pt-8 sm:px-6 lg:gap-24 lg:px-8 lg:pt-12">
-        <header className="flex items-center justify-between">
+        <header className="sticky top-4 z-20 flex items-center justify-between rounded-2xl border bg-background/90 px-4 py-3 shadow-sm backdrop-blur">
           <div className="flex items-center gap-2">
             <div className="rounded-md bg-primary/10 p-2 text-primary">
               <Target className="h-5 w-5" />
             </div>
             <span className="text-sm font-semibold tracking-wide">GravityLink</span>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/security">Security</Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="hidden sm:inline-flex">Now onboarding June cohorts</Badge>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/security">Security</Link>
+            </Button>
+          </div>
         </header>
 
         <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-background to-background p-6 sm:p-8 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-8 lg:p-10">
@@ -150,6 +158,17 @@ export default function HomePage() {
           </Card>
         </section>
 
+        <section aria-label="Trusted by teams" className="space-y-3 rounded-2xl border bg-card/60 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Trusted by modern product teams</p>
+          <div className="grid gap-2 text-center sm:grid-cols-5">
+            {partnerLogos.map((logo) => (
+              <div key={logo} className="rounded-md border bg-background px-3 py-2 text-sm font-medium text-muted-foreground">
+                {logo}
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section aria-labelledby="momentum-heading" className="space-y-4">
           <div className="space-y-1">
             <p className="text-sm font-medium text-primary">Momentum at a glance</p>
@@ -215,6 +234,21 @@ export default function HomePage() {
             })}
           </div>
         </section>
+
+        {enableNewFeature && (
+          <section className="rounded-2xl border border-primary/25 bg-gradient-to-r from-primary/10 via-background to-background p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-primary">Feature preview</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Join the AI Launch Pilot Workspace</h2>
+                <p className="max-w-xl text-sm text-muted-foreground">Early-access teams can co-edit release messaging, assign channel owners, and export campaign-ready assets from a single workspace.</p>
+              </div>
+              <Button size="lg" asChild>
+                <Link href="#cta">Request pilot access</Link>
+              </Button>
+            </div>
+          </section>
+        )}
 
         <section id="how-it-works" className="space-y-6" aria-labelledby="flow-heading">
           <div className="space-y-2">
