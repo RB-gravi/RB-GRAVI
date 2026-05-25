@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { resolveFeatureFlags } from "@/lib/featureFlags"
+import { ROICalculator } from "@/components/roi-calculator"
 
 const navLinks = [
   { label: "How it works", href: "#how-it-works" },
@@ -206,6 +207,14 @@ export default function HomePage() {
               </Card>
             ))}
           </div>
+        </section>
+
+        <section aria-labelledby="roi-heading" className="space-y-4">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-primary">Business impact</p>
+            <h2 id="roi-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">Quantify launch efficiency gains for your team in seconds.</h2>
+          </div>
+          <ROICalculator />
         </section>
 
         <section aria-labelledby="checklist-heading" className="space-y-5 rounded-2xl border bg-card/60 p-6 sm:p-8">
