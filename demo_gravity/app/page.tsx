@@ -84,6 +84,27 @@ const testimonials = [
   },
 ]
 
+const productUpdates = [
+  {
+    title: "Channel Brief Generator",
+    date: "May 2026",
+    summary:
+      "Create channel-specific launch briefs for email, in-app, and social in one click with audience-aware messaging suggestions.",
+  },
+  {
+    title: "Launch Risk Heatmap",
+    date: "April 2026",
+    summary:
+      "Automatically flags missing owners, weak value statements, and unresolved dependencies before release approval.",
+  },
+  {
+    title: "Support Enablement Pack",
+    date: "March 2026",
+    summary:
+      "Instantly generate support-ready macros, FAQ drafts, and escalation notes based on your latest release narrative.",
+  },
+]
+
 const faqs = [
   {
     question: "How does GravityLink connect to our development workflow?",
@@ -231,6 +252,28 @@ export default function HomePage() {
             <h2 id="customer-story-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">Teams launch faster when everyone works from the same release narrative.</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">{testimonials.map((testimonial) => (<Card key={testimonial.author}><CardContent className="space-y-4 p-6"><TrendingUp className="h-5 w-5 text-primary" /><p className="text-sm leading-relaxed text-muted-foreground">“{testimonial.quote}”</p><div><p className="text-sm font-semibold">{testimonial.author}</p><p className="text-xs text-muted-foreground">{testimonial.role}</p></div></CardContent></Card>))}</div>
+        </section>
+
+        <section aria-labelledby="product-updates-heading" className="space-y-5 rounded-2xl border bg-card/60 p-6 sm:p-8">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-primary">Product updates</p>
+            <h2 id="product-updates-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              See what’s new in GravityLink.
+            </h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {productUpdates.map((update) => (
+              <Card key={update.title} className="h-full border-primary/15">
+                <CardHeader className="space-y-2">
+                  <CardDescription>{update.date}</CardDescription>
+                  <CardTitle className="text-lg">{update.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{update.summary}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </section>
 
         <section className="space-y-6" aria-labelledby="value-proposition-heading">
