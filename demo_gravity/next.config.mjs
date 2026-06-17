@@ -64,7 +64,7 @@ const staticAssetCacheHeaders = [
     ],
   },
   {
-    source: "/:path*.(?:js|css|woff|woff2|ttf|otf|eot|svg|ico|jpg|jpeg|png|webp|avif|gif)",
+    source: "/:path*.:ext(js|css|woff|woff2|ttf|otf|eot|svg|ico|jpg|jpeg|png|webp|avif|gif)",
     headers: [
       {
         key: "Cache-Control",
