@@ -1,5 +1,16 @@
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, Clock3, ShieldCheck, Sparkles, Target, TrendingUp, Zap } from "lucide-react"
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  Layers3,
+  RadioTower,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Zap,
+} from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
@@ -61,6 +72,12 @@ const readinessChecklist = [
   { item: "Core release changes mapped to customer-facing value", progress: 96 },
   { item: "Stakeholder owners assigned for launch channels", progress: 88 },
   { item: "Enablement copy drafted for support and sales", progress: 82 },
+]
+
+const heroSignals = [
+  { label: "Audience fit", value: "Strong", tone: "bg-emerald-500" },
+  { label: "Owner coverage", value: "4 teams", tone: "bg-sky-500" },
+  { label: "Launch risk", value: "Low", tone: "bg-violet-500" },
 ]
 
 const momentumStats = [
@@ -129,7 +146,7 @@ export default function HomePage() {
   const { enableNewFeature } = resolveFeatureFlags()
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.13),transparent_34rem),linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.36))] text-foreground">
       <a
         href="#content"
         className="sr-only rounded-md p-2 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-background focus:shadow"
@@ -138,9 +155,9 @@ export default function HomePage() {
       </a>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-16 pt-8 sm:px-6 lg:gap-24 lg:px-8 lg:pt-12">
-        <header className="sticky top-4 z-20 flex items-center justify-between rounded-2xl border bg-background/90 px-4 py-3 shadow-sm backdrop-blur">
+        <header className="sticky top-4 z-20 flex items-center justify-between rounded-2xl border border-white/60 bg-background/75 px-4 py-3 shadow-lg shadow-primary/5 backdrop-blur-xl">
           <div className="flex items-center gap-2">
-            <div className="rounded-md bg-primary/10 p-2 text-primary">
+            <div className="rounded-xl bg-primary/10 p-2 text-primary shadow-inner">
               <Target className="h-5 w-5" />
             </div>
             <span className="text-sm font-semibold tracking-wide">GravityLink</span>
@@ -160,22 +177,25 @@ export default function HomePage() {
           </div>
         </header>
 
-        <section id="content" className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-background to-background p-6 sm:p-8 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-8 lg:p-10">
-          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/15 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-12 -left-10 h-36 w-36 rounded-full bg-primary/10 blur-3xl" />
-          <div className="space-y-6">
-            <Badge variant="secondary" className="w-fit">Fresh launch copy for product-led teams</Badge>
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+        <section id="content" className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-card/80 p-6 shadow-2xl shadow-primary/10 backdrop-blur sm:p-8 lg:grid lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-10 lg:p-10">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,hsl(var(--primary)/0.14),transparent_38%),radial-gradient(circle_at_80%_10%,hsl(var(--chart-4)/0.28),transparent_20rem),radial-gradient(circle_at_8%_90%,hsl(var(--chart-2)/0.16),transparent_18rem)]" />
+          <div className="pointer-events-none absolute left-8 top-8 h-24 w-24 rounded-full border border-primary/10" />
+          <div className="pointer-events-none absolute bottom-10 right-12 h-32 w-32 rounded-full border border-primary/10" />
+          <div className="relative space-y-6">
+            <Badge variant="secondary" className="w-fit border border-primary/10 bg-background/80 text-primary shadow-sm">
+              Fresh launch copy for product-led teams
+            </Badge>
+            <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
               Turn every product update into a clear customer story—before launch day.
             </h1>
             <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
               GravityLink helps teams transform release notes into value-driven messaging, align stakeholders faster, and ship launches with confidence.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button size="lg" asChild>
+              <Button size="lg" className="shadow-lg shadow-primary/20" asChild>
                 <Link href="#cta">Book a demo<ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" className="bg-background/70" asChild>
                 <Link href="#how-it-works">See how it works</Link>
               </Button>
             </div>
@@ -186,20 +206,44 @@ export default function HomePage() {
             </div>
           </div>
 
-          <Card className="border-primary/20 bg-background/80 shadow-sm backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Launch Readiness Snapshot</CardTitle>
-              <CardDescription>Get a single view of message quality before your release goes live.</CardDescription>
+          <Card className="relative overflow-hidden border-white/70 bg-background/85 shadow-2xl shadow-primary/10 backdrop-blur-xl">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky-400 to-emerald-400" />
+            <CardHeader className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <CardTitle>Launch Command Center</CardTitle>
+                  <CardDescription>Get a single view of message quality before your release goes live.</CardDescription>
+                </div>
+                <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+                  <RadioTower className="h-5 w-5" />
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border bg-background p-4">
-                <div className="text-sm text-muted-foreground">Average readiness</div>
-                <div className="mt-1 text-3xl font-semibold">92%</div>
-                <p className="mt-2 text-xs text-muted-foreground">Updated daily from active launch plans.</p>
+              <div className="rounded-2xl border bg-gradient-to-br from-primary/[0.08] to-background p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground">Average readiness</div>
+                    <div className="mt-1 text-5xl font-semibold tracking-tight">92%</div>
+                  </div>
+                  <div className="rounded-full border bg-background/80 px-3 py-1 text-xs font-medium text-primary">
+                    Live score
+                  </div>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">Updated daily from active launch plans.</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {heroSignals.map((signal) => (
+                  <div key={signal.label} className="rounded-2xl border bg-background/80 p-3">
+                    <div className={`mb-3 h-2 w-2 rounded-full ${signal.tone}`} />
+                    <p className="text-xs text-muted-foreground">{signal.label}</p>
+                    <p className="text-sm font-semibold">{signal.value}</p>
+                  </div>
+                ))}
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border bg-background p-3"><div className="flex items-center gap-2 text-sm font-medium"><Clock3 className="h-4 w-4 text-primary" />Faster handoffs</div><p className="mt-1 text-sm text-muted-foreground">Clear launch narratives across teams.</p></div>
-                <div className="rounded-lg border bg-background p-3"><div className="flex items-center gap-2 text-sm font-medium"><ShieldCheck className="h-4 w-4 text-primary" />Lower risk</div><p className="mt-1 text-sm text-muted-foreground">Pre-release checks reduce messaging gaps.</p></div>
+                <div className="rounded-2xl border bg-background/80 p-3"><div className="flex items-center gap-2 text-sm font-medium"><Clock3 className="h-4 w-4 text-primary" />Faster handoffs</div><p className="mt-1 text-sm text-muted-foreground">Clear launch narratives across teams.</p></div>
+                <div className="rounded-2xl border bg-background/80 p-3"><div className="flex items-center gap-2 text-sm font-medium"><Layers3 className="h-4 w-4 text-primary" />Channel-ready</div><p className="mt-1 text-sm text-muted-foreground">Launch assets packaged by audience.</p></div>
               </div>
             </CardContent>
           </Card>
