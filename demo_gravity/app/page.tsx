@@ -23,6 +23,7 @@ import { ROICalculator } from "@/components/roi-calculator"
 const navLinks = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Outcomes", href: "#momentum-heading" },
+  { label: "ROI", href: "#roi-heading" },
   { label: "FAQ", href: "#faq" },
 ]
 
@@ -141,6 +142,12 @@ const faqs = [
 ]
 
 const partnerLogos = ["Northstar Labs", "ClarityOS", "Helio Commerce", "Summit Cloud", "PulsePath"]
+
+const demoPrepItems = [
+  "Connect your first repo in under 5 minutes",
+  "Import active release owners automatically",
+  "Leave with a channel-ready launch brief",
+]
 
 export default function HomePage() {
   const { enableNewFeature } = resolveFeatureFlags()
@@ -342,8 +349,51 @@ export default function HomePage() {
         </section>
 
         <section id="cta" className="rounded-2xl border bg-card px-6 py-8 shadow-sm sm:px-8 sm:py-10">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"><div className="max-w-xl space-y-2"><p className="text-sm font-medium text-primary">Ready to modernize your launches?</p><h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Bring product, marketing, and release teams into one confident go-to-market rhythm.</h2><p className="text-sm text-muted-foreground sm:text-base">Start with a live walkthrough to see how GravityLink turns every release into a clear customer outcome.</p></div><Button size="lg" asChild><Link href="mailto:sales@gravitylink.com">Talk to sales<ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div>
+          <div className="grid gap-6 lg:grid-cols-[1fr_20rem] lg:items-center">
+            <div className="max-w-xl space-y-2">
+              <p className="text-sm font-medium text-primary">Ready to modernize your launches?</p>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Bring product, marketing, and release teams into one confident go-to-market rhythm.</h2>
+              <p className="text-sm text-muted-foreground sm:text-base">Start with a live walkthrough to see how GravityLink turns every release into a clear customer outcome.</p>
+            </div>
+            <div className="rounded-2xl border bg-muted/40 p-4">
+              <p className="text-sm font-semibold">Your first demo includes:</p>
+              <div className="mt-3 space-y-2">
+                {demoPrepItems.map((item) => (
+                  <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+              <Button size="lg" className="mt-4 w-full" asChild>
+                <Link href="mailto:sales@gravitylink.com">Talk to sales<ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
+            </div>
+          </div>
         </section>
+
+        <aside
+          aria-label="Launch navigation shortcut"
+          className="sticky bottom-4 z-30 rounded-2xl border border-primary/15 bg-background/90 p-3 shadow-2xl shadow-primary/10 backdrop-blur-xl"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold">Plan a smoother launch</p>
+              <p className="text-xs text-muted-foreground">Jump to the details teams need most, then book a guided walkthrough.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="#roi-heading">Estimate ROI</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="#how-it-works">View flow</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="#cta">Book demo</Link>
+              </Button>
+            </div>
+          </div>
+        </aside>
       </div>
     </main>
   )
