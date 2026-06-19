@@ -24,6 +24,7 @@ const navLinks = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Outcomes", href: "#momentum-heading" },
   { label: "ROI", href: "#roi-heading" },
+  { label: "Performance", href: "#performance-heading" },
   { label: "FAQ", href: "#faq" },
 ]
 
@@ -100,6 +101,30 @@ const testimonials = [
     author: "Marta L.",
     role: "Director of Support Enablement, PulsePath",
   },
+]
+
+const performanceUpdates = [
+  {
+    metric: "1.8s",
+    label: "Median page load",
+    detail: "Optimized launch brief rendering keeps distributed teams moving during release reviews.",
+  },
+  {
+    metric: "38%",
+    label: "Faster brief generation",
+    detail: "Prompt caching and slimmer payloads reduce wait time when teams create channel-ready copy.",
+  },
+  {
+    metric: "99.95%",
+    label: "Workflow availability",
+    detail: "Queue health checks and regional failover protect launch planning during peak release windows.",
+  },
+]
+
+const performanceImprovements = [
+  "Reduced dashboard bundle weight by deferring non-critical launch analytics.",
+  "Added readiness-score caching so repeat reviews open with the latest computed summary instantly.",
+  "Improved background sync reliability for active release owners and stakeholder assignments.",
 ]
 
 const productUpdates = [
@@ -303,6 +328,42 @@ export default function HomePage() {
             <h2 id="customer-story-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">Teams launch faster when everyone works from the same release narrative.</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">{testimonials.map((testimonial) => (<Card key={testimonial.author}><CardContent className="space-y-4 p-6"><TrendingUp className="h-5 w-5 text-primary" /><p className="text-sm leading-relaxed text-muted-foreground">“{testimonial.quote}”</p><div><p className="text-sm font-semibold">{testimonial.author}</p><p className="text-xs text-muted-foreground">{testimonial.role}</p></div></CardContent></Card>))}</div>
+        </section>
+
+        <section aria-labelledby="performance-heading" className="overflow-hidden rounded-2xl border bg-card/70 p-6 shadow-sm sm:p-8">
+          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-primary">Performance update</p>
+                <h2 id="performance-heading" className="text-2xl font-semibold tracking-tight sm:text-3xl">June platform improvements keep launch workflows fast and dependable.</h2>
+              </div>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                GravityLink now prioritizes faster brief generation, lighter dashboard interactions, and steadier sync behavior so teams can review launch readiness without slowing down release planning.
+              </p>
+              <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
+                <p className="text-sm font-semibold">What changed this cycle</p>
+                <div className="mt-3 space-y-2">
+                  {performanceImprovements.map((improvement) => (
+                    <div key={improvement} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <span>{improvement}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              {performanceUpdates.map((update) => (
+                <Card key={update.label} className="border-primary/15 bg-background/80">
+                  <CardContent className="space-y-2 p-5">
+                    <p className="text-3xl font-semibold tracking-tight text-primary">{update.metric}</p>
+                    <p className="text-sm font-semibold">{update.label}</p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{update.detail}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section aria-labelledby="product-updates-heading" className="space-y-5 rounded-2xl border bg-card/60 p-6 sm:p-8">
